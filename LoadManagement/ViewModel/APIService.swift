@@ -9,7 +9,7 @@ import Foundation
 
 class APIService {
     static let shared = APIService()
-    private let baseURL = "http://130.229.169.245:8000" // The IP address of my computer within my local network
+    private let baseURL = "http://130.229.169.245:8000" // The IP address of my computer within my local network 
 
     private init() {}
 
