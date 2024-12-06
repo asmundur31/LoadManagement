@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2339948D2CDB7A7800290632 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2339948C2CDB7A7800290632 /* LaunchScreen.storyboard */; };
+		239C2D492D00AC27005D03D0 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 239C2D482D00AC27005D03D0 /* ZIPFoundation */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		238A15DE2CD906970011ABE9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,14 +29,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2339948C2CDB7A7800290632 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		238A15CB2CD906950011ABE9 /* LoadManagement.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LoadManagement.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		238A15DD2CD906970011ABE9 /* LoadManagementTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoadManagementTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		238A15E72CD906970011ABE9 /* LoadManagementUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoadManagementUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2339948B2CDA53B700290632 /* Exceptions for "LoadManagement" folder in "LoadManagement" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 238A15CA2CD906950011ABE9 /* LoadManagement */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		238A15CD2CD906950011ABE9 /* LoadManagement */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2339948B2CDA53B700290632 /* Exceptions for "LoadManagement" folder in "LoadManagement" target */,
+			);
 			path = LoadManagement;
 			sourceTree = "<group>";
 		};
@@ -52,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				239C2D492D00AC27005D03D0 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,9 +95,11 @@
 		238A15C22CD906950011ABE9 = {
 			isa = PBXGroup;
 			children = (
+				2339948C2CDB7A7800290632 /* LaunchScreen.storyboard */,
 				238A15CD2CD906950011ABE9 /* LoadManagement */,
 				238A15E02CD906970011ABE9 /* LoadManagementTests */,
 				238A15EA2CD906970011ABE9 /* LoadManagementUITests */,
+				239C2D472D00AC27005D03D0 /* Frameworks */,
 				238A15CC2CD906950011ABE9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +112,13 @@
 				238A15E72CD906970011ABE9 /* LoadManagementUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		239C2D472D00AC27005D03D0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +141,7 @@
 			);
 			name = LoadManagement;
 			packageProductDependencies = (
+				239C2D482D00AC27005D03D0 /* ZIPFoundation */,
 			);
 			productName = LoadManagement;
 			productReference = 238A15CB2CD906950011ABE9 /* LoadManagement.app */;
@@ -195,6 +225,9 @@
 			);
 			mainGroup = 238A15C22CD906950011ABE9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				239C2D462D00AB4A005D03D0 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 238A15CC2CD906950011ABE9 /* Products */;
 			projectDirPath = "";
@@ -212,6 +245,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2339948D2CDB7A7800290632 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,11 +430,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LoadManagement/Preview Content\"";
+				DEVELOPMENT_TEAM = 75D46AU8U9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LoadManagement/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -424,11 +460,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LoadManagement/Preview Content\"";
+				DEVELOPMENT_TEAM = 75D46AU8U9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LoadManagement/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -552,6 +590,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		239C2D462D00AB4A005D03D0 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		239C2D482D00AC27005D03D0 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 239C2D462D00AB4A005D03D0 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 238A15C32CD906950011ABE9 /* Project object */;
 }

@@ -23,6 +23,11 @@ struct ContentView: View {
                     }
                 }
                 .onDelete(perform: deleteItems)
+                NavigationLink {
+                    DataUploadView()
+                } label: {
+                    Text(Date.now, format: Date.FormatStyle(date: .numeric, time: .standard))
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -34,8 +39,9 @@ struct ContentView: View {
                     }
                 }
             }
+        
         } detail: {
-            Text("Select an item")
+            Text("Halló heimur")
         }
     }
 
