@@ -18,6 +18,7 @@ class UsersViewModel {
                 case .success(let users):
                     self?.users = users
                 case .failure(let error):
+                    print(error)
                     print("Error fetching users: \(error.localizedDescription)")
                 }
             }

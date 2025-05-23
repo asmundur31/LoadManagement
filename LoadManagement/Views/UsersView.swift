@@ -16,7 +16,6 @@ struct UsersView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Custom Toolbar
             HStack {
                 Text("Users")
                     .font(.largeTitle)
@@ -33,7 +32,7 @@ struct UsersView: View {
             .background(Color(UIColor.systemBackground))
 
             List(viewModel.users) { user in
-                NavigationLink(destination: EditUserView(viewModel: viewModel, user: user)) {
+                NavigationLink(destination: UserDetailView(user: user)) {
                     HStack {
                         Text(user.user_name)
                         Spacer()
@@ -42,6 +41,7 @@ struct UsersView: View {
                 }
             }
             .listStyle(.plain)
+            
         }
         .onAppear {
             viewModel.fetchUsers()

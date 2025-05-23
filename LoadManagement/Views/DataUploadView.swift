@@ -94,27 +94,45 @@ struct DataUploadView: View {
                 }
                 HStack {
                     // Navigation link triggered by a selected directory
-                    if let directoryURL = selectedDirectoryURL {
-                        CustomButtonWithDestination(title: "View Data", color: Color.blue, destination: SplitscreenView(timeWindow: 10.0, directoryUrl: directoryURL))
-                    }
                     if let user = selectedUser, !selectedRecordingName.isEmpty, let directoryUrl = selectedDirectoryURL {
                         CustomButton(title: "Save Data", color: Color.green) {
+                            showError = false
+                            showError = false
                             isLoading = true
-                            do {
-                                try uploadViewModel.uploadData(user: user, recordingName: selectedRecordingName, directoryUrl: directoryUrl)
-                                isLoading = false
-                                // Reset error message if successful
-                                errorMessage = ""
-                                showError = false
-                                successMessage = "Data uploaded successfully!"
-                                showSuccess = true
-                            } catch {
-                                // Handle the error and set the error message
-                                isLoading = false
-                                successMessage = ""
-                                showSuccess = false
-                                errorMessage = "Failed to upload data: \(error.localizedDescription)"
-                                showError = true
+                            uploadViewModel.uploadData(user: user, recordingName: selectedRecordingName, directoryUrl: directoryUrl) { result in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success:
+                                        print("Upload succeeded.")
+                                        isLoading = false
+                                        // Reset error message if successful
+                                        errorMessage = ""
+                                        showError = false
+                                        successMessage = "Data uploaded successfully!"
+                                        showSuccess = true
+                                        // Update UI to reflect successful upload
+                                    case .failure(let error):
+                                        print("Upload failed: \(error.localizedDescription)")
+                                        isLoading = false
+                                        successMessage = ""
+                                        showSuccess = false
+                                        errorMessage = "Failed to upload data: \(error.localizedDescription)"
+                                        showError = true
+                                        // Show an error message to the user
+                                        if let uploadError = error as? UploadError {
+                                            switch uploadError {
+                                            case .userNotFound:
+                                                print("Error: User not found.")
+                                            case .recordingNameTaken:
+                                                print("Error: Recording name is already taken.")
+                                            case .failedToAccessSecurityScopedResource:
+                                                print("Error: Could not access security-scoped resource.")
+                                            default:
+                                                print("Other error: \(error.localizedDescription)")
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -128,7 +146,7 @@ struct DataUploadView: View {
         }
     }
     
-    func handleFileImport(result: Result<URL, Error>) { // Updated to handle multiple URLs
+    func handleFileImport(result: Result<URL, Error>) {
         switch result {
         case .success(let url):
             parseCSVFiles(at: url)

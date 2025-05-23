@@ -17,7 +17,6 @@ func createZip(
     fromDirectory directoryURL: URL
 ) throws -> URL {
     // see URL extension below
-    print(directoryURL.isDirectory)
     guard directoryURL.isDirectory else {
         throw CreateZipError.urlNotADirectory(directoryURL)
     }

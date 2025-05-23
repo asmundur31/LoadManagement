@@ -12,6 +12,6 @@ struct VideoData: Identifiable {
     var url: URL
     var startTime: Double
     var startTimeAdjustment: Double
-    var endTime: Double
+    var playbackSpeed: Double
     var duration: Double
 }

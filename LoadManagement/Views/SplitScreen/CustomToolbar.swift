@@ -8,32 +8,35 @@
 import SwiftUI
 
 struct CustomToolbar: View {
+    @Environment(RecordingViewModel.self) var recordingViewModel: RecordingViewModel
+
     @State private var showSettingsSheet = false  // State to control the visibility of the settings overlay
     @Binding var currentTime: Double
     @Binding var timeWindow: Double
-    @Binding var dataCategory: String
-    var dataCategoryOptions: [String] = ["Acc", "Gyro", "Magn"]
-    @Binding var sensorId: String
-    var sensorOptions: [Sensor]
-    var totalDataLength: Int
-    var dataStartTime: Double
-    var dataEndTime: Double
-    var dataFrequency: Double
-    @Binding var videos: [VideoData]
+    @Binding var currentDataCategory: String
+    @State var dataCategoryOptions: [String]
+    @Binding var currentSensor: Int
+    @State var sensorOptions: [String]
+    @State var totalDataLength: Int
+    @State var dataStartTime: Double
+    @State var dataEndTime: Double
+    @State var dataFrequency: Double
     @StateObject private var videoPlayerViewModel: VideoPlayerViewModel
 
-    init(currentTime: Binding<Double>, timeWindow: Binding<Double>, dataCategory: Binding<String>, sensorId: Binding<String>, sensors: [Sensor], totalDataLength: Int, dataStartTime: Double, dataEndTime: Double, dataFrequency: Double, videos: Binding<[VideoData]>) {
+    init(currentTime: Binding<Double>, currentTimeWindow: Binding<Double>, currentDataCategory: Binding<String>, currentSensor: Binding<Int>) {
         self._currentTime = currentTime
-        self._timeWindow = timeWindow
-        self._dataCategory = dataCategory
-        self._sensorId = sensorId
-        self.sensorOptions = sensors
-        self.totalDataLength = totalDataLength
-        self.dataStartTime = dataStartTime
-        self.dataEndTime = dataEndTime
-        self.dataFrequency = dataFrequency
-        self._videoPlayerViewModel = StateObject(wrappedValue: VideoPlayerViewModel(currentTime: currentTime))
-        self._videos = videos
+        self._timeWindow = currentTimeWindow
+        self._currentDataCategory = currentDataCategory
+        self._currentSensor = currentSensor
+        
+        self.sensorOptions = []
+        self.totalDataLength = 0
+        self.dataCategoryOptions = []
+        self.dataFrequency = 1.0
+        self.dataStartTime = 0.0
+        self.dataEndTime = 10.0
+        
+        _videoPlayerViewModel = StateObject(wrappedValue: VideoPlayerViewModel(currentTime: currentTime))
     }
     
     var body: some View {
@@ -48,7 +51,7 @@ struct CustomToolbar: View {
             
             HStack {
                 VStack {
-                    Picker("Options", selection: $dataCategory) {
+                    Picker("Data type", selection: $currentDataCategory) {
                         ForEach(dataCategoryOptions, id: \.self) { category in
                             Text(category).tag(category)
                         }
@@ -58,54 +61,18 @@ struct CustomToolbar: View {
                 }
                 
                 Spacer()
-                Button(action: {
-                    moveFrameBackward(10)
-                }) {
-                   Text("<<")
-                       .padding()
-                       .background(Color.blue)
-                       .foregroundColor(.white)
-                       .cornerRadius(8)
-                }
-                Button(action: {
-                    moveFrameBackward(1)
-                }) {
-                   Text("<")
-                       .padding()
-                       .background(Color.blue)
-                       .foregroundColor(.white)
-                       .cornerRadius(8)
-                }
-                Button(action: videoPlayerViewModel.togglePlayPause) {
-                    Text(videoPlayerViewModel.isPlaying ? "Pause" : "Play")
-                       .padding()
-                       .background(videoPlayerViewModel.isPlaying ? Color.red : Color.green)
-                       .foregroundColor(.white)
-                       .cornerRadius(8)
-                }
-                Button(action: {
-                    moveFrameForward(1)
-                }) {
-                   Text(">")
-                       .padding()
-                       .background(Color.blue)
-                       .foregroundColor(.white)
-                       .cornerRadius(8)
-                }
-                Button(action: {
-                    moveFrameForward(10)
-                }) {
-                   Text(">>")
-                       .padding()
-                       .background(Color.blue)
-                       .foregroundColor(.white)
-                       .cornerRadius(8)
+                HStack(spacing: 10) {
+                    playbackButton("<<", action: { moveFrameBackward(10) })
+                    playbackButton("<", action: { moveFrameBackward(1) })
+                    playbackButton(videoPlayerViewModel.isPlaying ? "Pause" : "Play", action: videoPlayerViewModel.togglePlayPause, color: videoPlayerViewModel.isPlaying ? .red : .green)
+                    playbackButton(">", action: { moveFrameForward(1) })
+                    playbackButton(">>", action: { moveFrameForward(10) })
                 }
                 Spacer()
                 VStack {
-                    Picker("Options", selection: $sensorId) {
-                        ForEach(sensorOptions) { sensor in
-                            Text(sensor.id).tag(sensor.id)
+                    Picker("Sensor", selection: $currentSensor) {
+                        ForEach(Array(sensorOptions.enumerated()), id: \.0) { index, sensorName in
+                            Text(sensorName).tag(index)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
@@ -117,7 +84,7 @@ struct CustomToolbar: View {
                     showSettingsSheet = true
                 }
                 .sheet(isPresented: $showSettingsSheet) {
-                    SettingsView(timeWindow: $timeWindow, showSettings: $showSettingsSheet, videos: $videos)
+                    SettingsView(currentTime: $currentTime, timeWindow: $timeWindow, showSettings: $showSettingsSheet)
                 }
             }
         }
@@ -125,7 +92,27 @@ struct CustomToolbar: View {
         .background(Color.white)
         .shadow(radius: 2)
         .onAppear() {
-            videoPlayerViewModel.dataFrequency = dataFrequency
+            if let recording = recordingViewModel.recording {
+                self.sensorOptions = recording.sensors.map { $0.getSensorName() }
+                
+                if currentSensor < recording.sensors.count {
+                    let selectedSensor = recording.sensors[currentSensor]
+                    self.totalDataLength = selectedSensor.recordingData.getTimeStamp().count
+                    self.dataCategoryOptions = selectedSensor.recordingData.getDataTypes()
+                    self.dataFrequency = selectedSensor.recordingInfo.getFrequency()
+                    
+                    let timestamps = selectedSensor.recordingData.getTimeStamp()
+                    self.dataStartTime = timestamps.first ?? 0.0
+                    self.dataEndTime = timestamps.last ?? 0.0
+                } else {
+                    // Handle the case where sensor index is out of bounds
+                    self.totalDataLength = 0
+                    self.dataCategoryOptions = []
+                    self.dataFrequency = 0.0
+                    self.dataStartTime = 0.0
+                    self.dataEndTime = 0.0
+                }
+            }
         }
     }
     
@@ -138,134 +125,30 @@ struct CustomToolbar: View {
     private func moveFrameForward(_ number: Int) {
         currentTime = min(currentTime + Double(number)*dataFrequency, dataEndTime)
     }
-}
-
-struct SettingsView: View {
-    @Binding var timeWindow: Double
-    @Binding var showSettings: Bool
-    @Binding var videos: [VideoData]
     
-    var body: some View {
-        VStack {
-            ScrollView {
-                VStack {
-                    Text("Settings")
-                        .font(.title)
-                        .padding()
-                    VStack {
-                        HStack {
-                            Text("Window size:")
-                            Slider(value: $timeWindow, in: 1...50, step: 1)
-                                .padding()
-                            Text(String(format: "%.2f", timeWindow))
-                            
-                        }
-                        HStack {
-                            Button(action: {
-                                timeWindow -= 0.1
-                            }) {
-                                Text("-")
-                                    .font(.title)
-                                    .padding()
-                                    .background(Color.red)
-                                    .foregroundColor(.white)
-                                    .clipShape(Circle())
-                            }
-                            Text(String(format: "%.2f", timeWindow))
-                                .font(.title)
-                                .padding(.horizontal, 20)
-                            
-                            Button(action: {
-                                timeWindow += 0.1
-                            }) {
-                                Text("+")
-                                    .font(.title)
-                                    .padding()
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .clipShape(Circle())
-                            }
-                        }
-                    }
-                    
-                    ForEach(videos.indices, id: \.self) { index in
-                        VStack {
-                            HStack {
-                                Text("Start time adjustment (video \(index + 1)):")
-                                Slider(value: $videos[index].startTimeAdjustment, in: -10...10, step: 0.1)
-                                    .padding()
-                                Text(String(format: "%.2f", videos[index].startTimeAdjustment))
-                            }
-                            HStack {
-                                Button(action: {
-                                    videos[index].startTimeAdjustment -= 0.01
-                                }) {
-                                    Text("-")
-                                        .font(.title)
-                                        .padding()
-                                        .background(Color.red)
-                                        .foregroundColor(.white)
-                                        .clipShape(Circle())
-                                }
-                                
-                                Text(String(format: "%.2f", videos[index].startTimeAdjustment))
-                                    .font(.title)
-                                    .padding(.horizontal, 20)
-                                
-                                Button(action: {
-                                    videos[index].startTimeAdjustment += 0.01
-                                }) {
-                                    Text("+")
-                                        .font(.title)
-                                        .padding()
-                                        .background(Color.green)
-                                        .foregroundColor(.white)
-                                        .clipShape(Circle())
-                                }
-                            }
-                        }
-                    }
-                    
-                    Button("Close Settings") {
-                        showSettings = false  // Close the overlay when the button is tapped
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
+    @ViewBuilder
+    private func playbackButton(_ title: String, action: @escaping () -> Void, color: Color = .blue) -> some View {
+        Button(action: action) {
+            Text(title)
                 .padding()
-                Spacer()
-            }
+                .background(color)
+                .foregroundColor(.white)
+                .cornerRadius(8)
         }
-        .edgesIgnoringSafeArea(.all)  // Make sure it covers the entire screen
     }
 }
 
 #Preview {
-    @Previewable @State var previewCurrentTime: Double = 23.0
+    @Previewable @State var previewCurrentTime: Double = 12.0
     @Previewable @State var previewTimeWindow: Double = 10.0
     @Previewable @State var previewDataCategory: String = "Acc"
-    @Previewable @State var previewSensorId: String = "1234567890"
-    @Previewable @State var videoSegments = [
-        VideoData(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")!, startTime: 23, startTimeAdjustment: 0.0, endTime: 38, duration: 15),
-        VideoData(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4")!, startTime: 69, startTimeAdjustment: 0.0, endTime: 84, duration: 15)
-    ]
-    let totalDataLength = 1000
-    let dataStartTime = 0.0
-    let dataEndTime = 1000.0
-    let dataFrequency = 1.0
+    @Previewable @State var previewSensor: Int = 0
+
     
     CustomToolbar(
         currentTime: $previewCurrentTime,
-        timeWindow: $previewTimeWindow,
-        dataCategory: $previewDataCategory,
-        sensorId: $previewSensorId,
-        sensors: [],
-        totalDataLength: totalDataLength,
-        dataStartTime: dataStartTime,
-        dataEndTime: dataEndTime,
-        dataFrequency: dataFrequency,
-        videos: $videoSegments
+        currentTimeWindow: $previewTimeWindow,
+        currentDataCategory: $previewDataCategory,
+        currentSensor: $previewSensor
     )
 }

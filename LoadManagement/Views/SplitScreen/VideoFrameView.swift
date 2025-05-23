@@ -24,10 +24,12 @@ struct VideoPlayerViewController: UIViewControllerRepresentable {
 }
 
 struct VideoFrameView: View {
-    var segments: [VideoData]
+    @Environment(RecordingViewModel.self) var recordingViewModel: RecordingViewModel
+
     @Binding var currentTime: Double
     @State private var player: AVPlayer? = nil
     @State private var currentSegment: VideoData? = nil
+    var playbackSpeed = 4.0
 
     var body: some View {
         VStack {
@@ -44,56 +46,62 @@ struct VideoFrameView: View {
                     )
             }
         }
-        .onChange(of: currentTime) { oldTime, newTime in
-            updateVideoPlayer(for: newTime)
+        .onChange(of: currentTime) { _, newTime in
+            DispatchQueue.main.async {
+                updateVideoPlayer(for: newTime)
+            }
         }
     }
 
     private func updateVideoPlayer(for time: Double) {
-        if let segment = segments.first(where: { ($0.endTime - $0.duration + $0.startTimeAdjustment) <= time && $0.endTime >= time }) {
-            if currentSegment?.url != segment.url {
-                let newPlayer = AVPlayer(url: segment.url)
-                player = newPlayer
-                currentSegment = segment
+        guard let videoSegment = recordingViewModel.recording?.videos.first(where: { segment in
+            let adjustedStart = segment.startTime + segment.startTimeAdjustment
+            let adjustedEnd = adjustedStart + segment.duration
+            return time >= adjustedStart && time <= adjustedEnd
+        }) else {
+            // No matching segment, clear the player
+            if player != nil {
+                player?.pause()
+                player = nil
+                currentSegment = nil
             }
-            let segmentRelativeTime = time - (segment.endTime - segment.duration + segment.startTimeAdjustment)
-            let cmTime = CMTime(seconds: segmentRelativeTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            player?.seek(to: cmTime, toleranceBefore: .zero, toleranceAfter: .zero)
-        } else {
-            // No video for the current time, clear player
-            player = nil
-            currentSegment = nil
+            return
         }
+
+        if currentSegment?.url != videoSegment.url {
+            // If it's a new segment, replace the current item instead of creating a new player
+            if let existingPlayer = player {
+                let newItem = AVPlayerItem(url: videoSegment.url)
+                existingPlayer.replaceCurrentItem(with: newItem)
+            } else {
+                player = AVPlayer(url: videoSegment.url)
+            }
+            currentSegment = videoSegment
+        }
+
+        // Seek to the correct position
+        let segmentRelativeTime = time - (videoSegment.startTime + videoSegment.startTimeAdjustment)
+        let cmTime = CMTime(seconds: segmentRelativeTime*videoSegment.playbackSpeed, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        player?.seek(to: cmTime, toleranceBefore: CMTime(seconds: 0.01, preferredTimescale: CMTimeScale(NSEC_PER_SEC)), toleranceAfter: CMTime(seconds: 0.01, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
     }
 }
 
 
 #Preview {
-    @Previewable @State var previewCurrentTime: Double = 10.0
+    @Previewable @State var previewCurrentTime: Double = 0.0
     @Previewable @State var previewTimeWindow: Double = 10.0
     @Previewable @State var previewDataCategory: String = "Acc"
-    @Previewable @State var previewSensorId: String = "1234567890"
+    @Previewable @State var previewSensor: Int = 0
 
-    @Previewable @State var videoSegments = [
-        VideoData(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")!, startTime: 23, startTimeAdjustment: 0.0, endTime: 38, duration: 15),
-        VideoData(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4")!, startTime: 69, startTimeAdjustment: 0.0, endTime: 84, duration: 15)
-    ]
     VStack {
         VideoFrameView(
-            segments: videoSegments,
             currentTime: $previewCurrentTime
         )
         CustomToolbar(
             currentTime: $previewCurrentTime,
-            timeWindow: $previewTimeWindow,
-            dataCategory: $previewDataCategory,
-            sensorId: $previewSensorId,
-            sensors: [],
-            totalDataLength: 100,
-            dataStartTime: 0,
-            dataEndTime: 100,
-            dataFrequency: 1,
-            videos: $videoSegments
+            currentTimeWindow: $previewTimeWindow,
+            currentDataCategory: $previewDataCategory,
+            currentSensor: $previewSensor
         )
     }
     

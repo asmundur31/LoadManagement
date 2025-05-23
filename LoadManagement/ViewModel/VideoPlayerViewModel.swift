@@ -12,11 +12,10 @@ import SwiftUI
 class VideoPlayerViewModel: ObservableObject {
     @Binding var currentTime: Double
     @Published var isPlaying: Bool = false
-    var dataFrequency: Double = 1.0 // Set your frequency here
-    
+
     private var displayLink: CADisplayLink?
     private var lastUpdateTime: CFTimeInterval = 0
-    
+
     init(currentTime: Binding<Double>) {
         self._currentTime = currentTime
     }
@@ -43,9 +42,10 @@ class VideoPlayerViewModel: ObservableObject {
     }
 
     @objc private func updateCurrentTime(displayLink: CADisplayLink) {
-        // Increment currentTime in real-time based on deltaTime and dataFrequency
-        currentTime += dataFrequency
-        // Update the lastUpdateTime to maintain continuous playback
+        let deltaTime = displayLink.timestamp - lastUpdateTime
+        let playbackSpeed: Double = 1.0 // Adjust if needed (1.0 = real-time, 2.0 = 2x speed, etc.)
+
+        currentTime += deltaTime * playbackSpeed
         lastUpdateTime = displayLink.timestamp
     }
 }

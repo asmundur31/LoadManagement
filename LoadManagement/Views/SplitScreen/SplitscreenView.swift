@@ -8,21 +8,17 @@
 import SwiftUI
 
 struct SplitscreenView: View {
+    @Environment(RecordingViewModel.self) var recordingViewModel: RecordingViewModel
+
     @State private var currentTime: Double
     @State private var timeWindow: Double
-    var directoryUrl: URL
-    private var sensors: [Sensor]
-    @State private var currentSensor: Sensor
-    @State private var videos: [VideoData]
-    private var annotations: [Annotation]
-    
+    @State private var dataCategory: String
+    @State private var currentSensor: Int
+
     // State for adjusting the split view
     @State private var videoWidthRatio: CGFloat = 0.5
     @State private var videoHeightRatio: CGFloat = 0.5
-    
-    // For changing data category
-    @State private var dataCategory: String = "Acc"
-    @State private var sensorId: String = ""
+
     
     var body: some View {
         VStack {
@@ -31,7 +27,7 @@ struct SplitscreenView: View {
                     // Landscape - side by side layout
                     HStack(spacing: 0) {
                         // Video frame takes up a fraction of the width based on videoWidthRatio
-                        VideoFrameView(segments: videos, currentTime: $currentTime)
+                        VideoFrameView(currentTime: $currentTime)
                             .frame(width: geometry.size.width * videoWidthRatio)
                             .background(Color.black) // Add background color for visual separation
                         
@@ -48,14 +44,14 @@ struct SplitscreenView: View {
                             )
                         
                         // Graph view takes up the remaining width
-                        GraphView(currentTime: $currentTime, timeWindow: $timeWindow, sensor: $currentSensor, dataCategory: $dataCategory)
+                        GraphView(currentTime: $currentTime, timeWindow: $timeWindow, currentSensor: $currentSensor, dataCategory: $dataCategory)
                             .frame(width: geometry.size.width * (1 - videoWidthRatio))
                             .background(Color.white) // Add background color for visual separation
                     }
                 } else {
                     // Portrait - stacked layout
                     VStack(spacing: 0) {
-                        VideoFrameView(segments: videos, currentTime: $currentTime)
+                        VideoFrameView(currentTime: $currentTime)
                             .frame(height: geometry.size.height * videoHeightRatio)
                             .background(Color.black) // Add background color for visual separation
                         
@@ -71,7 +67,7 @@ struct SplitscreenView: View {
                                     }
                             )
                         
-                        GraphView(currentTime: $currentTime, timeWindow: $timeWindow, sensor: $currentSensor, dataCategory: $dataCategory)
+                        GraphView(currentTime: $currentTime, timeWindow: $timeWindow, currentSensor: $currentSensor, dataCategory: $dataCategory)
                             .frame(height: geometry.size.height * (1-videoHeightRatio))
                             .background(Color.white) // Add background color for visual separation
                     }
@@ -80,53 +76,24 @@ struct SplitscreenView: View {
             
             CustomToolbar(
                 currentTime: $currentTime,
-                timeWindow: $timeWindow,
-                dataCategory: $dataCategory,
-                sensorId: $sensorId,
-                sensors: sensors,
-                totalDataLength: currentSensor.data.count,
-                dataStartTime: currentSensor.data.first!.timestamp,
-                dataEndTime: currentSensor.data.last!.timestamp,
-                dataFrequency: currentSensor.frequency,
-                videos: $videos
+                currentTimeWindow: $timeWindow,
+                currentDataCategory: $dataCategory,
+                currentSensor: $currentSensor
             )
         }
         .navigationTitle("Splitscreen View")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear() {
-            let dataViewModel = DataViewModel()
-            Task {
-                videos = await dataViewModel.getVideos(directoryUrl: directoryUrl)
-            }
-
-        }
-        .onChange(of: sensorId) { oldValue, newValue in
-            if let matchingSensor = sensors.first(where: { $0.id == newValue }) {
-                currentSensor = matchingSensor
-            } else {
-                print("No sensor found with ID \(newValue)")
+        .onAppear {
+            if let firstTimestamp = recordingViewModel.recording?.sensors.first?.recordingData.getTimeStamp().first {
+                self.currentTime = firstTimestamp
             }
         }
     }
     
-    init(timeWindow: Double, directoryUrl: URL) {
-        let dataViewModel = DataViewModel()
-        self.sensors = dataViewModel.getSensors(directoryUrl: directoryUrl)
-        self.currentSensor = sensors[0]
-        self.videos = []
-        self.currentTime = sensors[0].data[0].timestamp
-        self.sensorId = sensors[0].id
+    init(timeWindow: Double) {
         self.timeWindow = timeWindow
-        self.directoryUrl = directoryUrl
-        self.annotations = [
-            Annotation(timestamp: 0, type: "RecordingStart", content: ""),
-            Annotation(timestamp: 33, type: "RecordingPause", content: ""),
-            Annotation(timestamp: 34, type: "RecordingResume", content: ""),
-            Annotation(timestamp: 37, type: "VideoAnnotationStart", content: ""),
-            Annotation(timestamp: 62, type: "VideoAnnotationStop", content: ""),
-            Annotation(timestamp: 68, type: "VideoAnnotationStart", content: ""),
-            Annotation(timestamp: 83, type: "VideoAnnotationStop", content: ""),
-            Annotation(timestamp: 100, type: "RecordingStop", content: "")
-        ]
+        self.dataCategory = "Acc"
+        self.currentSensor = 0
+        self.currentTime = 0.0
     }
 }

@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct LoadManagementApp: App {
+    @State var recordingViewModel = RecordingViewModel()
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,6 +27,7 @@ struct LoadManagementApp: App {
     var body: some Scene {
         WindowGroup {
             HomeView()
+                .environment(recordingViewModel)
         }
         .modelContainer(sharedModelContainer)
     }
