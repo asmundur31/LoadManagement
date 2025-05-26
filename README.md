@@ -50,3 +50,6 @@ The videos will be filtered by created time so in case they are not in correct o
 
 
 Example recording is provided called "Example data".
+
+# Contact
+If any questions about this repository or the project please contact the creator at: asmundur31@gmail.com
