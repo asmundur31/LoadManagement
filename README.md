@@ -4,6 +4,7 @@ An app to analyze imu data and video. Overview of training load.
 ## Upload data
 To be compatible with the app, each recording must be uploaded as a folder with the following structure:
 
+```
 Recording_Name/  
 ├── sensor1/  
 │ ├── acc_data.csv  
@@ -18,7 +19,7 @@ Recording_Name/
 ├── video1.mp4  
 ├── video2.mp4  
 ...  
-
+```
 
 ## 🔹 Folder Naming
 - The top-level folder (`Recording_Name`) should describe the session or user.  
@@ -42,5 +43,10 @@ Each sensor folder must include the following files:
 - Consistent sampling rate across files
 
 ---
+
+## Video Files
+The videos will be filtered by created time so in case they are not in correct order check the created date header of the video.
+
+
 
 Example recording is provided called "Example data".
