@@ -4,20 +4,20 @@ An app to analyze imu data and video. Overview of training load.
 ## Upload data
 To be compatible with the app, each recording must be uploaded as a folder with the following structure:
 
-Recording_Name/
-├── sensor1/
-│ ├── acc_data.csv
-│ ├── gyro_data.csv
-│ └── magn_data.csv
-├── sensor2/
-│ ├── acc_data.csv
-│ ├── gyro_data.csv
-│ └── magn_data.csv
-├── sensor3/
-│ └── ...
-├── video1.mp4
-├── video2.mp4
-...
+Recording_Name/  
+├── sensor1/  
+│ ├── acc_data.csv  
+│ ├── gyro_data.csv  
+│ └── magn_data.csv  
+├── sensor2/  
+│ ├── acc_data.csv  
+│ ├── gyro_data.csv  
+│ └── magn_data.csv  
+├── sensor3/  
+│ └── ...  
+├── video1.mp4  
+├── video2.mp4  
+...  
 
 
 ## 🔹 Folder Naming
